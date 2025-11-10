@@ -34,11 +34,11 @@ public class Hub extends BaseTimeEntity {
     @Column(name = "longitude")
     private Double longitude;
 
-    public void update(Hub updatedHub) {
-        this.name = updatedHub.getName();
-        this.address = updatedHub.getAddress();
-        this.latitude = updatedHub.getLatitude();
-        this.longitude = updatedHub.getLongitude();
+    public void update(String name, String address, Double latitude, Double longitude) {
+        if (name != null) this.name = name;
+        if (address != null) this.address = address;
+        if (latitude != null) this.latitude = latitude;
+        if (longitude != null) this.longitude = longitude;
     }
 
     public void delete(Long userId) {

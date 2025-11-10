@@ -1,21 +1,16 @@
 package com.logilink.hub.domain.hub.service;
 
-import com.logilink.hub.domain.hub.model.entity.Hub;
-
-import java.util.List;
+import com.logilink.hub.domain.hub.model.dto.request.HubCreateRequest;
+import com.logilink.hub.domain.hub.model.dto.request.HubUpdateRequest;
+import com.logilink.hub.domain.hub.model.dto.response.HubResponse;
 import java.util.UUID;
-
-import com.logilink.hub.domain.hub.model.entity.Hub;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 
-import java.util.List;
-import java.util.UUID;
 
 public interface HubService {
-    Hub createHub(Hub hub);
-    Hub updateHub(UUID hubId, Hub updatedHub);
+    HubResponse createHub(HubCreateRequest hubCreateRequest);
+    HubResponse updateHub(UUID hubId, HubUpdateRequest hubUpdateRequest);
     void deleteHub(UUID hubId);
-    Hub getHub(UUID hubId);
-    Page<Hub> getHubPage(String keyword, Pageable pageable);
+    HubResponse getHub(UUID hubId);
+    Page<HubResponse> getHubPage(String keyword, int page, int size, String sort);
 }
