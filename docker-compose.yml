@@ -1,0 +1,34 @@
+version: "3.9"
+services:
+  hub-db:
+    image: postgres:17
+    container_name: hub-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: logilink_hub
+    ports:
+      - "5436:5432"
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+    restart: always
+
+  hub-service:
+
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: hub-service
+    ports:
+      - "19096:19096"
+    environment:
+
+      DB_HOST: hub-db
+      DB_PORT: 5432
+      DB_NAME: logilink_hub
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      SERVER_PORT: 19096
+    depends_on:
+      - hub-db
+    restart: always
