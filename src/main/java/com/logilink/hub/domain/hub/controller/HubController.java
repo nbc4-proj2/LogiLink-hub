@@ -54,14 +54,18 @@ public class HubController {
     public ResponseEntity<Page<HubResponse>> getAllHubs(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "createdAt, desc") String sort,
+            @RequestParam(defaultValue = "createdAt,desc") String sort,
             @RequestParam(required = false) String keyword
     ) {
+
+        List<Integer> allowedSizes = List.of(10, 30, 50);
+        int finalSize = allowedSizes.contains(size) ? size : 10;
+
         String[] sortParam = sort.split(",");
         Sort.Direction direction = sortParam.length > 1 && sortParam[1].equalsIgnoreCase("asc")
                 ? Sort.Direction.ASC : Sort.Direction.DESC;
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortParam[0]));
+        Pageable pageable = PageRequest.of(page, finalSize, Sort.by(direction, sortParam[0])); // finalSize 사용
 
         Page<Hub> hubs = hubService.getHubPage(keyword, pageable);
 
@@ -71,3 +75,4 @@ public class HubController {
     }
 
 }
+

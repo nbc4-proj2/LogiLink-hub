@@ -30,6 +30,7 @@ public class HubServiceImpl implements HubService {
     }
 
     @Override
+    @Transactional
     public Hub updateHub(UUID hubId, Hub updatedHub) {
         Hub existingHub = hubRepository.findByIdAndDeletedAtIsNull(hubId)
                 .orElseThrow(() -> AppException.of(HubErrorCode.HUB_NOT_FOUND));
@@ -58,6 +59,7 @@ public class HubServiceImpl implements HubService {
         return hubRepository.findByIdAndDeletedAtIsNull(hubId)
                 .orElseThrow(() -> AppException.of(HubErrorCode.HUB_NOT_FOUND));
     }
+
 
     @Override
     public Page<Hub> getHubPage(String keyword, Pageable pageable){
