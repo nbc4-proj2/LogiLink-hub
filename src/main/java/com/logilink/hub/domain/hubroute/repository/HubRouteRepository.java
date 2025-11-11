@@ -55,5 +55,8 @@ OR LOWER(r.destinationHub.name) LIKE LOWER(CONCAT('%', :keyword, '%')))
 
     Optional<HubRoute> findByIdAndDeletedAtIsNull(UUID routeId);
 
+    @Query("SELECT r FROM HubRoute r WHERE r.deletedAt IS NULL")
+    List<HubRoute> findAllActiveList();
+
 }
 
