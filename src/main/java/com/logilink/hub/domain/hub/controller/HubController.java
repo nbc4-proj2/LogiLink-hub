@@ -32,15 +32,13 @@ public class HubController {
     @Operation(summary = "허브 생성", description = "새로운 허브 등록")
     @PostMapping
     public ResponseEntity<HubResponse> createHub(@Valid @RequestBody HubCreateRequest hubCreateRequest) {
-        Hub hub = hubService.createHub(hubCreateRequest.toEntity());
-        return ResponseEntity.ok(new HubResponse(hub));
+        return ResponseEntity.ok(hubService.createHub(hubCreateRequest));
     }
 
     @Operation(summary = "허브 수정", description = "허브의 이름, 주소, 위도, 경도 수정")
     @PutMapping("/{hubId}")
     public ResponseEntity<HubResponse> updateHub(@PathVariable UUID hubId, @Valid @RequestBody HubUpdateRequest hubUpdateRequest) {
-        Hub hub = hubService.updateHub(hubId, hubUpdateRequest.toEntity());
-        return ResponseEntity.ok(new HubResponse(hub));
+        return ResponseEntity.ok(hubService.updateHub(hubId, hubUpdateRequest));
     }
 
     @Operation(summary = "허브 삭제", description = "허브를 논리적으로 삭제")
@@ -53,8 +51,7 @@ public class HubController {
     @Operation(summary = "허브 단건 조회", description = "허브 ID로 단일 조회")
     @GetMapping("/{hubId}")
     public ResponseEntity<HubResponse> getHub(@PathVariable UUID hubId) {
-        Hub hub = hubService.getHub(hubId);
-        return ResponseEntity.ok(new HubResponse(hub));
+        return ResponseEntity.ok(hubService.getHub(hubId));
     }
 
     @Operation(summary = "허브 전체 조회", description = "검색어, 페이지, 정렬 조건을 기준으로 허브 조회")
@@ -65,20 +62,7 @@ public class HubController {
             @RequestParam(defaultValue = "createdAt,desc") String sort,
             @RequestParam(required = false) String keyword
     ) {
-
-        List<Integer> allowedSizes = List.of(10, 30, 50);
-        int finalSize = allowedSizes.contains(size) ? size : 10;
-
-        String[] sortParam = sort.split(",");
-        Sort.Direction direction = sortParam.length > 1 && sortParam[1].equalsIgnoreCase("asc")
-                ? Sort.Direction.ASC : Sort.Direction.DESC;
-
-        Pageable pageable = PageRequest.of(page, finalSize, Sort.by(direction, sortParam[0])); // finalSize 사용
-
-        Page<Hub> hubs = hubService.getHubPage(keyword, pageable);
-
-        Page<HubResponse> hubResponses = hubs.map(HubResponse::new);
-        return ResponseEntity.ok(hubResponses);
+        return ResponseEntity.ok(hubService.getHubPage(keyword, page, size, sort));
 
     }
 
