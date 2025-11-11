@@ -21,31 +21,46 @@ public class HubServiceImpl implements HubService {
     @Override
     @Transactional
     public Hub createHub(Hub hub) {
+        if (hubRepository.existsByName(hub.getName())) {
+            throw AppException.of(HubErrorCode.HUB_NAME_DUPLICATE);
+        }
         return hubRepository.save(hub);
     }
 
     @Override
     public Hub updateHub(UUID hubId, Hub updatedHub) {
-        Hub existingHub = hubRepository.findByIdAndDeletedAtIsNull(hubId).orElseThrow(() -> AppException.of(HubErrorCode.HUB_NOT_FOUND));
+        Hub existingHub = hubRepository.findByIdAndDeletedAtIsNull(hubId)
+                .orElseThrow(() -> AppException.of(HubErrorCode.HUB_NOT_FOUND));
+
+        // 이름이 바뀌었을 때 그 이름이 이미 사용중이라면 예외
+        if (updatedHub.getName() != null
+                && !updatedHub.getName().equals(existingHub.getName())
+                && hubRepository.existsByName(updatedHub.getName())) {
+            throw AppException.of(HubErrorCode.HUB_NAME_DUPLICATE);
+        }
         existingHub.update(updatedHub);
-        return hubRepository.save(existingHub);
+        return existingHub;
     }
 
     @Override
     public void deleteHub(UUID hubId) {
-        Hub hub = hubRepository.findByIdAndDeletedAtIsNull(hubId).orElseThrow(() -> AppException.of(HubErrorCode.HUB_NOT_FOUND));
+        Hub hub = hubRepository.findByIdAndDeletedAtIsNull(hubId)
+                .orElseThrow(() -> AppException.of(HubErrorCode.HUB_NOT_FOUND));
+
         hub.delete(1L); // 추후 실제 로그인 유저 ID로 대체
 
     }
 
     @Override
     public Hub getHub(UUID hubId) {
-        return hubRepository.findById(hubId).orElseThrow(() -> AppException.of(HubErrorCode.HUB_NOT_FOUND));
+        return hubRepository.findByIdAndDeletedAtIsNull(hubId)
+                .orElseThrow(() -> AppException.of(HubErrorCode.HUB_NOT_FOUND));
     }
 
     @Override
     public List<Hub> getAllHubs() {
         return hubRepository.findAllByDeletedAtIsNull();
     }
+
 
 }

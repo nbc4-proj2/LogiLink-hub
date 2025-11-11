@@ -7,6 +7,7 @@ import com.logilink.hub.domain.hub.model.entity.Hub;
 import com.logilink.hub.domain.hub.repository.HubRepository;
 import com.logilink.hub.domain.hub.service.HubService;
 import com.logilink.hub.domain.hub.service.HubServiceImpl;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,13 +23,13 @@ public class HubController {
     private final HubService hubService;
 
     @PostMapping
-    public ResponseEntity<HubResponse> createHub(@RequestBody HubCreateRequest hubCreateRequest) {
+    public ResponseEntity<HubResponse> createHub(@Valid @RequestBody HubCreateRequest hubCreateRequest) {
         Hub hub = hubService.createHub(hubCreateRequest.toEntity());
         return ResponseEntity.ok(new HubResponse(hub));
     }
 
     @PutMapping("/{hubId}")
-    public ResponseEntity<HubResponse> updateHub(@PathVariable UUID hubId, @RequestBody HubUpdateRequest hubUpdateRequest) {
+    public ResponseEntity<HubResponse> updateHub(@PathVariable UUID hubId, @Valid @RequestBody HubUpdateRequest hubUpdateRequest) {
         Hub hub = hubService.updateHub(hubId, hubUpdateRequest.toEntity());
         return ResponseEntity.ok(new HubResponse(hub));
     }
@@ -45,6 +46,7 @@ public class HubController {
         return ResponseEntity.ok(new HubResponse(hub));
     }
 
+    @GetMapping
     public ResponseEntity<List<HubResponse>> getAllHubs() {
         List<HubResponse> hubs = hubService.getAllHubs()
                 .stream()
@@ -52,5 +54,6 @@ public class HubController {
                 .toList();
         return ResponseEntity.ok(hubs);
     }
+
 
 }
