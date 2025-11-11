@@ -5,6 +5,8 @@ import com.logilink.hub.domain.hub.model.entity.Hub;
 import com.logilink.hub.domain.hub.repository.HubRepository;
 import com.sparta.logilinkcommon.common.exception.AppException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +30,7 @@ public class HubServiceImpl implements HubService {
     }
 
     @Override
+    @Transactional
     public Hub updateHub(UUID hubId, Hub updatedHub) {
         Hub existingHub = hubRepository.findByIdAndDeletedAtIsNull(hubId)
                 .orElseThrow(() -> AppException.of(HubErrorCode.HUB_NOT_FOUND));
@@ -57,10 +60,15 @@ public class HubServiceImpl implements HubService {
                 .orElseThrow(() -> AppException.of(HubErrorCode.HUB_NOT_FOUND));
     }
 
+
     @Override
-    public List<Hub> getAllHubs() {
-        return hubRepository.findAllByDeletedAtIsNull();
+    public Page<Hub> getHubPage(String keyword, Pageable pageable){
+        if (keyword != null && !keyword.isEmpty()) {
+            return hubRepository.searchHubs(keyword, pageable);
+        }
+
+        return hubRepository.findAllActive(pageable);
     }
 
-
 }
+
