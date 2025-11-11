@@ -6,6 +6,7 @@ import com.logilink.hub.domain.hub.model.dto.request.HubUpdateRequest;
 import com.logilink.hub.domain.hub.model.dto.response.HubResponse;
 import com.logilink.hub.domain.hub.model.entity.Hub;
 import com.logilink.hub.domain.hub.repository.HubRepository;
+import com.logilink.hub.domain.hubroute.repository.HubRouteRepository;
 import com.sparta.logilinkcommon.common.exception.AppException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -24,6 +25,7 @@ import java.util.UUID;
 public class HubServiceImpl implements HubService {
 
     private final HubRepository hubRepository;
+    private final HubRouteRepository hubRouteRepository;
 
     @Override
     @Transactional
@@ -62,6 +64,14 @@ public class HubServiceImpl implements HubService {
     public void deleteHub(UUID hubId) {
         Hub hub = hubRepository.findByIdAndDeletedAtIsNull(hubId)
                 .orElseThrow(() -> AppException.of(HubErrorCode.HUB_NOT_FOUND));
+
+        hub.delete(1L); // 나중에 로그인 사용자 ID로 교체
+
+        hubRouteRepository.findActiveByOrigin(hub)
+                .forEach(route -> route.delete(1L));// 나중에 로그인 사용자 ID로 교체
+
+        hubRouteRepository.findActiveByDestination(hub)
+                .forEach(route -> route.delete(1l));// 나중에 로그인 사용자 ID로 교체
 
         hub.delete(1L); // 나중에 로그인 사용자 ID로 교체
     }
