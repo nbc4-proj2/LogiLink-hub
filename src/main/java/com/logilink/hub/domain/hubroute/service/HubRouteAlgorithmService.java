@@ -47,6 +47,7 @@ public class HubRouteAlgorithmService {
     }
 
     // 다익스트라 알고리즘 - 허브 간 최단 경로 게산
+    @Cacheable(value = "shortestPaths", key = "#originHubId + ':' + #destinationHubId")
     @Transactional(readOnly = true)
     public List<Hub> findShortestPath(UUID originHubId, UUID destinationHubId) {
         Hub origin = hubRepository.findByIdAndDeletedAtIsNull(originHubId)

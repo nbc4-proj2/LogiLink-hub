@@ -1,4 +1,10 @@
 spring:
+  # 레디스 추가
+  data:
+    redis:
+      host: redis
+      port: 6379
+
   application:
     name: hub-service
 
@@ -24,19 +30,19 @@ spring:
     locations: classpath:db/migration
 
 server:
-  port: ${SERVER_PORT:19096}
+  port: 19096
 
 eureka:
   client:
-    enabled: false
-    register-with-eureka: false
-    fetch-registry: false
+    register-with-eureka: true
+    fetch-registry: true
     service-url:
       defaultZone: http://eureka-server:19090/eureka
     instance:
       hostname: hub-service
       prefer-ip-address: true
       instance-id: ${spring.application.name}:${random.value}
+
 
 logging:
   level:

@@ -3,20 +3,18 @@ version: "3.9"
 services:
 
 #  # Eureka Server
-#  eureka-server:
-#    env_file:
-#      - .env
-#    image: openjdk:17
-#    container_name: eureka-server
-#    build:
-#      context: ./eureka-server
-#      dockerfile: Dockerfile
-#    ports:
-#      - "19090:19090"
-#    networks:
-#      - logilink-network
-
-
+  eureka-server:
+    env_file:
+      - .env
+    image: openjdk:17
+    container_name: eureka-server
+    build:
+      context: ../LogiLink-eureka-server
+      dockerfile: Dockerfile
+    ports:
+      - "19090:19090"
+    networks:
+      - logilink-network
 
 
 #  # Gateway
@@ -87,12 +85,27 @@ services:
       SERVER_PORT: ${SERVER_PORT}
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE}
     depends_on:
-#      - eureka-server
+      eureka-server:
+        condition: service_healthy
       hub-db:
         condition: service_healthy
     networks:
       - logilink-network
     restart: always
+
+
+
+# 레디스
+  redis:
+    image: redis:7.2-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - logilink-network
+
+
+
 
 networks:
   logilink-network:
