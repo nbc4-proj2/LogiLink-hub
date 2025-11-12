@@ -18,26 +18,24 @@ services:
 
 
 #  # Gateway
-#  gateway-service:
-#    env_file:
-#      - .env
-#    image: openjdk:17
-#    container_name: gateway-service
-#    build:
-#      context: ./gateway-service
-#      dockerfile: Dockerfile
-#    ports:
-#      - "19091:19091"
-#    environment:
-#      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE}
-#      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
-#    depends_on:
-#      - eureka-server
-#    networks:
-#      - logilink-network
-#    restart: always
-
-
+  gateway-service:
+    env_file:
+      - .env
+    image: openjdk:17
+    container_name: gateway-service
+    build:
+      context: ./gateway-service
+      dockerfile: Dockerfile
+    ports:
+      - "19091:19091"
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+    depends_on:
+      - eureka-server
+    networks:
+      - logilink-network
+    restart: always
 
 
   # Hub Database
@@ -89,6 +87,10 @@ services:
         condition: service_healthy
       hub-db:
         condition: service_healthy
+      redis:
+        condition: service_started
+      zipkin:
+        condition: service_started
     networks:
       - logilink-network
     restart: always
@@ -105,6 +107,15 @@ services:
       - logilink-network
 
 
+
+  zipkin:
+    image: openzipkin/zipkin:latest
+    container_name: zipkin-server
+    ports:
+      - "9411:9411"
+    networks:
+      - logilink-network
+    restart: always
 
 
 networks:
