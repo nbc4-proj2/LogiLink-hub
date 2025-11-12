@@ -46,7 +46,8 @@ public class HubRoute extends BaseTimeEntity {
         if (totalDuration != null) this.totalDuration = totalDuration;
     }
 
-    public  void delete(Long userId) {
-        softDelete(userId);
+    public void delete() {
+        softDelete();
     }
+
 }

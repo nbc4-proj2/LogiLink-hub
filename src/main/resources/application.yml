@@ -1,7 +1,11 @@
 spring:
+  application:
+    name: hub-service
+
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://${DB_HOST:hub-db}:${DB_PORT:5432}/${DB_NAME:logilink_hub}
+#    url: jdbc:postgresql://localhost:5436/logilink_hub
     username: ${DB_USERNAME:postgres}
     password: ${DB_PASSWORD:postgres}
 
@@ -19,17 +23,22 @@ spring:
     baseline-on-migrate: true
     locations: classpath:db/migration
 
-  application:
-    name: hub-service
-
 server:
   port: ${SERVER_PORT:19096}
 
 eureka:
   client:
-    register-with-eureka: true
-    fetch-registry: true
+    enabled: false
+    register-with-eureka: false
+    fetch-registry: false
     service-url:
-      defaultZone: http://localhost:19090/eureka
+      defaultZone: http://eureka-server:19090/eureka
     instance:
       hostname: hub-service
+      prefer-ip-address: true
+      instance-id: ${spring.application.name}:${random.value}
+
+logging:
+  level:
+    com.logilink: INFO
+    org.springframework.cloud: WARN

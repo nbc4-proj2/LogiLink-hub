@@ -7,8 +7,10 @@ import com.logilink.hub.domain.hub.model.dto.response.HubResponse;
 import com.logilink.hub.domain.hub.model.entity.Hub;
 import com.logilink.hub.domain.hub.repository.HubRepository;
 import com.logilink.hub.domain.hubroute.repository.HubRouteRepository;
+import com.logilink.hub.global.security.CustomAuditorAware;
 import com.sparta.logilinkcommon.common.exception.AppException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +28,8 @@ public class HubServiceImpl implements HubService {
 
     private final HubRepository hubRepository;
     private final HubRouteRepository hubRouteRepository;
+    private final CustomAuditorAware auditorAware;
+
 
     @Override
     @Transactional
@@ -65,20 +69,19 @@ public class HubServiceImpl implements HubService {
         Hub hub = hubRepository.findByIdAndDeletedAtIsNull(hubId)
                 .orElseThrow(() -> AppException.of(HubErrorCode.HUB_NOT_FOUND));
 
-        hub.delete(1L); // 나중에 로그인 사용자 ID로 교체
+        hub.delete(); // AuditorAware가 자동으로 userId 채워줌
 
         hubRouteRepository.findActiveByOrigin(hub)
-                .forEach(route -> route.delete(1L));// 나중에 로그인 사용자 ID로 교체
+                .forEach(route -> route.delete());
 
         hubRouteRepository.findActiveByDestination(hub)
-                .forEach(route -> route.delete(1l));// 나중에 로그인 사용자 ID로 교체
+                .forEach(route -> route.delete());
 
-        hub.delete(1L); // 나중에 로그인 사용자 ID로 교체
     }
 
     @Override
     public HubResponse getHub(UUID hubId) {
-         Hub hub = hubRepository.findByIdAndDeletedAtIsNull(hubId)
+        Hub hub = hubRepository.findByIdAndDeletedAtIsNull(hubId)
                 .orElseThrow(() -> AppException.of(HubErrorCode.HUB_NOT_FOUND));
         return new HubResponse(hub);
     }
@@ -103,4 +106,3 @@ public class HubServiceImpl implements HubService {
     }
 
 }
-

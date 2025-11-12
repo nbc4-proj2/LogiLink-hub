@@ -8,6 +8,7 @@ import com.sparta.logilinkcommon.common.exception.AppException;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -25,7 +26,6 @@ public class HubRouteAlgorithmService {
 
     private final HubRepository hubRepository;
     private final HubRouteRepository hubRouteRepository;
-    private Map<UUID, List<HubEdge>> cachedGraph; // 캐싱 필드
 
     @Getter
     @AllArgsConstructor
@@ -106,11 +106,8 @@ public class HubRouteAlgorithmService {
     }
 
     // 전체 허브-경로 관계를 그래프로 구성
-    private Map<UUID, List<HubEdge>> buildGraph() {
-
-        if (cachedGraph != null) {
-            return cachedGraph;
-        }
+    @Cacheable(value = "hubRoutes", key = "'allGraph'")
+    public Map<UUID, List<HubEdge>> buildGraph() {
 
         Map<UUID, List<HubEdge>> graph = new HashMap<>();
         List<HubRoute> routes = hubRouteRepository.findAllActiveList();
@@ -122,11 +119,8 @@ public class HubRouteAlgorithmService {
 
             graph.computeIfAbsent(originId, k -> new ArrayList<>())
                     .add(new HubEdge(destId, distance));
-            graph.computeIfAbsent(destId, k -> new ArrayList<>())
-                    .add(new HubEdge(originId, distance)); // 양방향 연결
         }
 
-        cachedGraph = graph;
         return graph;
     }
 

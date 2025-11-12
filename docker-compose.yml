@@ -1,34 +1,99 @@
 version: "3.9"
+
 services:
+
+#  # Eureka Server
+#  eureka-server:
+#    env_file:
+#      - .env
+#    image: openjdk:17
+#    container_name: eureka-server
+#    build:
+#      context: ./eureka-server
+#      dockerfile: Dockerfile
+#    ports:
+#      - "19090:19090"
+#    networks:
+#      - logilink-network
+
+
+
+
+#  # Gateway
+#  gateway-service:
+#    env_file:
+#      - .env
+#    image: openjdk:17
+#    container_name: gateway-service
+#    build:
+#      context: ./gateway-service
+#      dockerfile: Dockerfile
+#    ports:
+#      - "19091:19091"
+#    environment:
+#      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE}
+#      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+#    depends_on:
+#      - eureka-server
+#    networks:
+#      - logilink-network
+#    restart: always
+
+
+
+
+  # Hub Database
   hub-db:
+    env_file:
+      - .env
     image: postgres:17
     container_name: hub-db
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: logilink_hub
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - "5436:5432"
     volumes:
       - ./postgres-data:/var/lib/postgresql/data
+    networks:
+      - logilink-network
     restart: always
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER}" ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
+
+
+
+  # Hub Service
   hub-service:
-
+    env_file:
+      - .env
     build:
       context: .
       dockerfile: Dockerfile
     container_name: hub-service
     ports:
-      - "19096:19096"
+      - "${SERVER_PORT}:${SERVER_PORT}"
     environment:
-
-      DB_HOST: hub-db
-      DB_PORT: 5432
-      DB_NAME: logilink_hub
-      DB_USERNAME: postgres
-      DB_PASSWORD: postgres
-      SERVER_PORT: 19096
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_NAME: ${DB_NAME}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      SERVER_PORT: ${SERVER_PORT}
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE}
     depends_on:
-      - hub-db
+#      - eureka-server
+      hub-db:
+        condition: service_healthy
+    networks:
+      - logilink-network
     restart: always
+
+networks:
+  logilink-network:
+    driver: bridge
