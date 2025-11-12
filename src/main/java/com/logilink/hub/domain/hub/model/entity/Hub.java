@@ -41,9 +41,8 @@ public class Hub extends BaseTimeEntity {
         if (longitude != null) this.longitude = longitude;
     }
 
-    public void delete(Long userId) {
-        softDelete(userId);
+    public void delete() {
+        softDelete();
     }
-
 
 }

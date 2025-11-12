@@ -1,24 +1,45 @@
 package com.logilink.hub.global.security;
 
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.util.Optional;
 
+@Slf4j
 @Component("auditorAware")
+@RequiredArgsConstructor
 public class CustomAuditorAware implements AuditorAware<Long> {
+
+    private final AuthHeaderExtractor authHeaderExtractor;
 
     @Override
     public Optional<Long> getCurrentAuditor() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return Optional.of(1L); // 비로그인 상태 테스트용
-        }
+        try {
+            ServletRequestAttributes attributes =
+                    (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
 
-        // 실제론 JWT payload에서 userId 꺼내서 넣어야 함
-        // 예: return Optional.of(jwtService.extractUserId(authentication));
-        return Optional.of(999L); // 예시값
+            if (attributes == null) {
+                return Optional.empty();
+            }
+
+            HttpServletRequest request = attributes.getRequest();
+            Long userId = authHeaderExtractor.getUserId(request);
+
+            // 게이트웨이가 헤더에 X-User-Id를 안 넣었을 때 (비정상 요청)
+            if (userId == null) {
+                return Optional.empty();
+            }
+
+            return Optional.of(userId);
+        } catch (Exception e) {
+            return Optional.empty();
+        }
     }
 }

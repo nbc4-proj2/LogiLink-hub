@@ -10,6 +10,7 @@ import com.logilink.hub.domain.hubroute.model.entity.HubRoute;
 import com.logilink.hub.domain.hubroute.repository.HubRouteRepository;
 import com.sparta.logilinkcommon.common.exception.AppException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -30,6 +31,7 @@ public class HubRouteServiceImpl implements HubRouteService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "hubRoutes", key = "'allGraph'")
     public HubRouteResponse createRoute(HubRouteCreateRequest hubRouteCreateRequest) {
         Hub origin = hubRepository.findByIdAndDeletedAtIsNull(hubRouteCreateRequest.getOriginHubId())
                 .orElseThrow(() -> AppException.of(HubErrorCode.HUB_NOT_FOUND));
@@ -49,6 +51,7 @@ public class HubRouteServiceImpl implements HubRouteService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "hubRoutes", key = "'allGraph'")
     public HubRouteResponse updateRoute(UUID routeId, HubRouteUpdateRequest hubRouteUpdateRequest) {
         HubRoute existingRoute = hubRouteRepository.findByIdAndDeletedAtIsNull(routeId)
                 .orElseThrow(() -> AppException.of(HubErrorCode.HUB_ROUTE_NOT_FOUND));
@@ -60,11 +63,12 @@ public class HubRouteServiceImpl implements HubRouteService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "hubRoutes", key = "'allGraph'")
     public void deleteRoute(UUID routeId) {
         HubRoute hubRoute = hubRouteRepository.findByIdAndDeletedAtIsNull(routeId)
                 .orElseThrow(() -> AppException.of(HubErrorCode.HUB_ROUTE_NOT_FOUND));
 
-        hubRoute.delete(1L); // 추후 로그인 유저 ID로 교체
+        hubRoute.delete();
     }
 
     @Override
@@ -93,3 +97,4 @@ public class HubRouteServiceImpl implements HubRouteService {
         return routes.map(HubRouteResponse::new);
     }
 }
+
