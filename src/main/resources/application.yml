@@ -43,8 +43,17 @@ eureka:
       prefer-ip-address: true
       instance-id: ${spring.application.name}:${random.value}
 
-
 logging:
   level:
     com.logilink: INFO
     org.springframework.cloud: WARN
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+    propagation:
+      type: B3
+
+  zipkin:
+    base-url: http://zipkin-server:9411
